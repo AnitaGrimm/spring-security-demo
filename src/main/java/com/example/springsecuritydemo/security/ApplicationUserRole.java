@@ -1,13 +1,12 @@
-package com.example.apringsecuritydemo.security;
+package com.example.springsecuritydemo.security;
 
 import com.google.common.collect.Sets;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.example.apringsecuritydemo.security.ApplicationUserPermission.*;
+import static com.example.springsecuritydemo.security.ApplicationUserPermission.*;
 
 public enum ApplicationUserRole {
     STUDENT(Sets.newHashSet()),

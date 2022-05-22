@@ -1,4 +1,4 @@
-package com.example.apringsecuritydemo.student;
+package com.example.springsecuritydemo.student;
 
 public class Student {
     private final Integer studentId;

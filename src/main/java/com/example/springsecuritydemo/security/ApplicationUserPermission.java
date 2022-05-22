@@ -1,4 +1,4 @@
-package com.example.apringsecuritydemo.security;
+package com.example.springsecuritydemo.security;
 
 public enum ApplicationUserPermission {
     STUDENT_READ("student:read"),

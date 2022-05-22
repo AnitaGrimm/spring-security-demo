@@ -1,4 +1,4 @@
-package com.example.apringsecuritydemo.student;
+package com.example.springsecuritydemo.student;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
