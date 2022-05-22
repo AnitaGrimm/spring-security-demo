@@ -34,26 +34,32 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() //TODO: disable this only on non-brousers clients, like APIs
-                // Cross Site Request Forgery
+                /*  Cross Site Request Forgery
+                    Disable this only on non-brousers clients, like APIs */
+                .csrf().disable()
                 .authorizeRequests()
+                /*  Equivalent of @PreAuthorize. For example:
+                    .antMatchers(HttpMethod.GET,"/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+                    .antMatchers(HttpMethod.PUT,"/management/api/**").hasAuthority(ApplicationUserPermission.COURSES_WRITE.getPermission())
+                */
                 .antMatchers("/", "index","/css/*", "/js/*").permitAll()
+                // First mather has higher priority than others.
                 .antMatchers("/api/**").hasRole(STUDENT.name())
-//                Equivalent of PreAuthorize
-//                .antMatchers(HttpMethod.DELETE,"/management/api/**").hasAuthority(ApplicationUserPermission.COURSES_WRITE.getPermission())
-//                .antMatchers(HttpMethod.POST,"/management/api/**").hasAuthority(ApplicationUserPermission.COURSES_WRITE.getPermission())
-//                .antMatchers(HttpMethod.PUT,"/management/api/**").hasAuthority(ApplicationUserPermission.COURSES_WRITE.getPermission())
-//                .antMatchers(HttpMethod.GET,"/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
                 .anyRequest()
                 .authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login").permitAll()
-                .defaultSuccessUrl("/courses", true)
+                    .loginPage("/login")
+                    .permitAll()
+                    .defaultSuccessUrl("/courses", true)
+                    // 'password', 'username' and 'remember-id' - names of <input> in html templates
+                    .passwordParameter("password")
+                    .usernameParameter("username")
                 .and()
                 .rememberMe()
-                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) //defaults for 2 weeks
+                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) // Defaults for 2 weeks
                     .key("somethingverysecured")
+                    .rememberMeParameter("remember-me")
                 .and()
                 .logout()
                     .logoutUrl("/logout")

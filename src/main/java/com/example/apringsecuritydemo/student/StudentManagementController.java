@@ -16,7 +16,7 @@ public class StudentManagementController {
             new Student(3, "Anna Smith")
     );
 
-    //   hasRole('ROLE_') hasAnyRole('ROLE_') hasAuthority('permission') hasAnyAuthority('permission')
+    // Can use PreAuthorize with: hasRole('ROLE_'), hasAnyRole('ROLE_'), hasAuthority('permission') or hasAnyAuthority('permission')
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_ADMINTRAINEE')")
