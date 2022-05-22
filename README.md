@@ -1,5 +1,5 @@
 # spring-security-demo
 Spring security demo application
 
-This branch won't be merged into a master. 
+This branch won't be merged into a main. 
 Here is my materials that I've written by listening course of Spring Security by Amigoscode.
