@@ -1,6 +1,7 @@
 package com.example.springsecuritydemo.security;
 
 import com.example.springsecuritydemo.auth.ApplicationUserService;
+import com.example.springsecuritydemo.jwt.JwtUsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -43,6 +45,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                  *   Disable this only on non-brousers clients, like APIs
                  */
                 .csrf().disable()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilter(new JwtUsernamePasswordAuthenticationFilter(authenticationManager()))
                 .authorizeRequests()
                 /*  Equivalent of @PreAuthorize. For example:
                  *   .antMatchers(HttpMethod.GET,"/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
@@ -52,29 +58,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 // First mather has higher priority than others.
                 .antMatchers("/api/**").hasRole(STUDENT.name())
                 .anyRequest()
-                .authenticated()
-                .and()
-                .formLogin()
-                    .loginPage("/login")
-                    .permitAll()
-                    .defaultSuccessUrl("/courses", true)
-                    // 'password', 'username' and 'remember-id' - names of <input> in html templates
-                    .passwordParameter("password")
-                    .usernameParameter("username")
-                .and()
-                .rememberMe()
-                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) // Defaults for 2 weeks
-                    .key("somethingverysecured")
-                    .rememberMeParameter("remember-me")
-                .and()
-                .logout()
-                    .logoutUrl("/logout")
-                    // If csrf enabled(default), you should delete this line
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
-                    .clearAuthentication(true)
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID", "remember-me")
-                    .logoutSuccessUrl("/login");
+                .authenticated();
     }
 
     @Override
