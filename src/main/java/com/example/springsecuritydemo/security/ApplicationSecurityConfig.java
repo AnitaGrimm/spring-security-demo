@@ -1,8 +1,11 @@
 package com.example.springsecuritydemo.security;
 
+import com.example.springsecuritydemo.auth.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,23 +27,27 @@ import static com.example.springsecuritydemo.security.ApplicationUserRole.*;
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationUserService applicationUserService;
 
     @Autowired
-    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder) {
+    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder,
+                                     ApplicationUserService applicationUserService) {
         this.passwordEncoder = passwordEncoder;
+        this.applicationUserService = applicationUserService;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 /*  Cross Site Request Forgery
-                    Disable this only on non-brousers clients, like APIs */
+                 *   Disable this only on non-brousers clients, like APIs
+                 */
                 .csrf().disable()
                 .authorizeRequests()
                 /*  Equivalent of @PreAuthorize. For example:
-                    .antMatchers(HttpMethod.GET,"/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
-                    .antMatchers(HttpMethod.PUT,"/management/api/**").hasAuthority(ApplicationUserPermission.COURSES_WRITE.getPermission())
-                */
+                 *   .antMatchers(HttpMethod.GET,"/management/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+                 *   .antMatchers(HttpMethod.PUT,"/management/api/**").hasAuthority(ApplicationUserPermission.COURSES_WRITE.getPermission())
+                 */
                 .antMatchers("/", "index","/css/*", "/js/*").permitAll()
                 // First mather has higher priority than others.
                 .antMatchers("/api/**").hasRole(STUDENT.name())
@@ -70,31 +77,16 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                     .logoutSuccessUrl("/login");
     }
 
-    @Bean
-    protected UserDetailsService userDetailsService() {
-         UserDetails annaSmithUser = User.builder()
-                .username("annasmith")
-                .password(passwordEncoder.encode("password"))
-                 .authorities(STUDENT.getGrantedAuthorities())
-//                .roles(STUDENT.name()) // ROLE_STUDENT
-                .build();
-         UserDetails lindaUser = User.builder()
-                 .username("linda")
-                 .password(passwordEncoder.encode("password123"))
-//                 .roles(ADMIN.name()) // ROLE_ADMIN
-                 .authorities(ADMIN.getGrantedAuthorities())
-                 .build();
-         UserDetails tomUser = User.builder()
-                 .username("tom")
-                 .password(passwordEncoder.encode("password123"))
-//                 .roles(ADMINTRAINEE.name()) // ROLE_ADMIN
-                 .authorities(ADMINTRAINEE.getGrantedAuthorities())
-                 .build();
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
 
-         return new InMemoryUserDetailsManager(
-                 annaSmithUser,
-                 lindaUser,
-                 tomUser
-         );
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(applicationUserService);
+        return provider;
     }
 }
